@@ -1,0 +1,46 @@
+services:
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    volumes:
+      - .:/app
+      # keep container node_modules separate from Windows host
+      - app_node_modules:/app/node_modules
+      - ./auto_ingest_pdfs:/app/auto_ingest_pdfs
+    env_file: .env
+    environment:
+      # Vite HMR needs to know the public host for WebSocket
+      - VITE_HMR_HOST=localhost
+      # Point Ollama at the compose service, not localhost
+      - OLLAMA_URL=http://ollama:11434
+    depends_on:
+      - ollama
+    restart: unless-stopped
+
+  embedder:
+    build:
+      context: .
+      dockerfile: Dockerfile.embedder
+    volumes:
+      - .:/app
+      # cache the ~280 MB sentence-transformers model between runs
+      - embedder_model_cache:/root/.cache/huggingface
+    env_file: .env
+    restart: unless-stopped
+
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    restart: unless-stopped
+
+volumes:
+  app_node_modules:
+  embedder_model_cache:
+  ollama_data:

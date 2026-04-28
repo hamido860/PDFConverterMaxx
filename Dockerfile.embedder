@@ -1,0 +1,9 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+RUN pip install --no-cache-dir sentence-transformers supabase python-dotenv
+
+COPY embed-local.py ./
+
+CMD ["python", "-u", "embed-local.py"]

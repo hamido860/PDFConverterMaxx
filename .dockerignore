@@ -1,0 +1,8 @@
+node_modules
+dist
+.git
+.claude
+auto_ingest_pdfs
+rag_cache.db
+*.log
+*.pdf
