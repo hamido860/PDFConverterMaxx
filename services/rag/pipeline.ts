@@ -8,6 +8,9 @@ import { pdfExtractionService } from './pdfExtractionService';
 import { supabaseRagService } from './supabaseRagService';
 import type { ChunkDraft, ChunkQualityResult } from './types';
 import { createContentHash, detectGeneratedContent } from './utils';
+import { MIN_QUALITY_SCORE } from './chunkQualityService';
+
+const MIN_POST_REPAIR_SCORE = 0.5;
 
 async function classifyAndResolve(fileName: string, previewText: string) {
   const [gradeNames, subjectNames] = await Promise.all([
@@ -112,6 +115,14 @@ export async function processRagExtractionJob(jobId: string, documentId: string,
       insertedChunks.push(chunk);
     }
 
+    const rejectedCount = scannedChunks.filter(c => c.quality.reject).length;
+    const duplicateCount = scannedChunks.filter(c => c.quality.duplicate).length;
+    const reviewCount = scannedChunks.filter(c => c.quality.repairStatus === 'needs_review').length;
+    const cleanCount = scannedChunks.filter(c => c.quality.repairStatus === 'clean').length;
+    await supabaseRagService.appendJobLog(
+      jobId,
+      `Quality scan: ${cleanCount} clean, ${reviewCount} needs_review, ${duplicateCount} duplicate, ${rejectedCount} rejected (threshold=${MIN_QUALITY_SCORE}).`,
+    );
     await supabaseRagService.appendJobLog(jobId, `Saved ${insertedChunks.length} chunk row(s) to Supabase.`);
 
     await supabaseRagService.updateJob(jobId, { status: 'repairing' });
@@ -133,6 +144,17 @@ export async function processRagExtractionJob(jobId: string, documentId: string,
         });
 
         const generatedContent = repair.generatedContent || detectGeneratedContent(chunk.original_content || chunk.content, repair.repairedContent);
+
+        // Reject if repair didn't bring the chunk above the minimum bar
+        const postRepairStatus = repair.qualityScoreAfter < MIN_POST_REPAIR_SCORE ? 'rejected' : 'auto_repaired';
+        if (postRepairStatus === 'rejected') {
+          await supabaseRagService.appendJobLog(
+            jobId,
+            `Chunk ${chunk.id} rejected after repair: post-repair score ${repair.qualityScoreAfter.toFixed(2)} < ${MIN_POST_REPAIR_SCORE}.`,
+            'warn',
+          );
+        }
+
         await supabaseRagService.saveChunkEdits({
           chunkId: chunk.id,
           content: repair.repairedContent,
@@ -146,8 +168,9 @@ export async function processRagExtractionJob(jobId: string, documentId: string,
             repair_notes: repair.repairNotes,
             suggested_metadata: repair.suggestedMetadata,
             generated_content: generatedContent,
+            quality_score_after_repair: repair.qualityScoreAfter,
           },
-          repairStatus: 'auto_repaired',
+          repairStatus: postRepairStatus,
           reviewNotes: repair.repairNotes,
         });
       } catch (error: any) {
@@ -159,7 +182,7 @@ export async function processRagExtractionJob(jobId: string, documentId: string,
     const activeChunks = await supabaseRagService.listChunks({ documentId });
     for (const chunk of activeChunks) {
       if (!chunk.is_active) continue;
-      if (!['clean', 'embedded'].includes(chunk.repair_status)) continue;
+      if (!['clean', 'embedded', 'auto_repaired'].includes(chunk.repair_status)) continue;
       if (!chunk.content_hash) continue;
 
       try {

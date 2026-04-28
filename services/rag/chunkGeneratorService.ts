@@ -14,7 +14,12 @@ function detectSegmentType(text: string): string {
 
 function detectTitle(text: string, fallback: string | null): string | null {
   const firstLine = text.split('\n')[0]?.trim() ?? '';
-  if (firstLine.length >= 8 && firstLine.length <= 120) {
+  if (
+    firstLine.length >= 8 &&
+    firstLine.length <= 120 &&
+    /[a-zA-Z؀-ۿ]/.test(firstLine) &&
+    !/^[\d\s\W]+$/.test(firstLine)
+  ) {
     return firstLine;
   }
   return fallback;
