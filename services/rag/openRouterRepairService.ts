@@ -2,7 +2,17 @@ import type { DocumentClassification, RepairResult } from './types';
 import { clampScore } from './utils';
 
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
-const OPENROUTER_KEY = process.env.OPENROUTER_KEY || '';
+const OPENROUTER_KEYS = (process.env.OPENROUTER_KEY || '')
+  .split(',')
+  .map(k => k.trim())
+  .filter(Boolean);
+let keyIndex = 0;
+function nextKey(): string {
+  if (OPENROUTER_KEYS.length === 0) return '';
+  const key = OPENROUTER_KEYS[keyIndex % OPENROUTER_KEYS.length];
+  keyIndex++;
+  return key;
+}
 const FAST_MODELS = (process.env.OPENROUTER_FAST_MODELS || 'openai/gpt-4.1-mini,qwen/qwen3-30b-a3b:free')
   .split(',')
   .map(model => model.trim())
@@ -18,7 +28,7 @@ let circuitOpen = false;
 let circuitOpenReason = '';
 
 async function callOpenRouterJson<T>(models: string[], messages: Array<{ role: string; content: string }>): Promise<T> {
-  if (!OPENROUTER_KEY) {
+  if (OPENROUTER_KEYS.length === 0) {
     throw new Error('OPENROUTER_KEY is not configured');
   }
 
@@ -30,7 +40,7 @@ async function callOpenRouterJson<T>(models: string[], messages: Array<{ role: s
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${OPENROUTER_KEY}`,
+      'Authorization': `Bearer ${nextKey()}`,
       'HTTP-Referer': 'http://localhost:3001',
       'X-Title': 'PDFConverterMaxx RAG Repair',
     },
