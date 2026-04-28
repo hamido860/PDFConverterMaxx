@@ -1,0 +1,283 @@
+{
+  "_comment": "All keys are lowercase, non-accented, separators stripped. Values are exact DB names from grades/subjects tables.",
+
+  "grades": {
+    "1ère année Bac": [
+      "1bac", "1 bac", "bac1", "bac 1", "1_bac", "1-bac",
+      "1erbac", "1er bac", "1er-bac",
+      "1erebac", "1ere bac", "1ere-bac",
+      "premiere bac", "premierbac", "premierebac", "premier bac",
+      "1bacalaureat", "1 bacalaureat", "1 baccalaureat",
+      "1baccalaureat", "baccalaureat1", "bacalaureat1",
+      "1bacalareat", "1 bacalareat", "bacalareat1",
+      "1bac sci", "1bac-sci", "1bac-s",
+      "1basc", "1 basc", "basc1",
+      "1bacl", "1 bacl", "bacl1",
+      "firstbac", "first bac", "first-bac",
+      "bac premiere", "bac-premiere",
+      "annee bac 1", "annee-bac-1",
+      "1annee bac", "1 annee bac",
+      "1ere annee bac", "1ere-annee-bac",
+      "1eme bac", "1eme-bac", "1eme annee bac",
+      "السنة الأولى بكالوريا", "السنة الاولى بكالوريا",
+      "الأولى بكالوريا", "الاولى بكالوريا",
+      "اول بكالوريا", "أول بكالوريا",
+      "1 بكالوريا", "بكالوريا 1", "بك1", "1بك",
+      "السنة الأولى باك", "الأولى باك", "1 باك", "باك1",
+      "البكالوريا الأولى", "السنة 1 بكالوريا"
+    ],
+    "2ème année Bac": [
+      "2bac", "2 bac", "bac2", "bac 2", "2_bac", "2-bac",
+      "2emebac", "2eme bac", "2eme-bac",
+      "deuxiemebac", "deuxieme bac", "deuxieme-bac",
+      "2bacalaureat", "2 bacalaureat", "2baccalaureat", "2 baccalaureat",
+      "baccalaureat2", "bacalaureat2",
+      "2bacalareat", "2 bacalareat", "bacalareat2",
+      "2basc", "2 basc", "basc2",
+      "2bacl", "2 bacl", "bacl2",
+      "secondbac", "second bac", "second-bac",
+      "bac deuxieme", "bac-deuxieme",
+      "annee bac 2", "annee-bac-2",
+      "2annee bac", "2 annee bac",
+      "2eme annee bac", "2eme-annee-bac",
+      "terminale", "terminale bac", "term bac",
+      "السنة الثانية بكالوريا", "السنة الثانية باك",
+      "الثانية بكالوريا", "الثانية باك",
+      "ثاني بكالوريا", "ثانية بكالوريا",
+      "2 بكالوريا", "بكالوريا 2", "بك2", "2بك",
+      "البكالوريا الثانية", "السنة 2 بكالوريا"
+    ],
+    "Tronc Commun": [
+      "tcs", "tc", "t c", "t-c",
+      "tronc commun", "tronc-commun", "tronccommun",
+      "tronc commun scientifique", "tcs sci",
+      "common core", "tc sci", "tc-sci",
+      "1ere lycee", "1ere-lycee", "premiere lycee",
+      "1lc", "1 lc", "lc1",
+      "الجذع المشترك", "الجدع المشترك",
+      "جذع مشترك", "جدع مشترك",
+      "الجذع", "الجدع",
+      "tronc", "tc علمي", "tcs علمي",
+      "الجذع المشترك العلمي", "الجذع العلمي",
+      "الجذع المشترك الأدبي", "الجذع الأدبي"
+    ],
+    "1ère année collège": [
+      "1col", "1 col", "col1", "1c",
+      "1ere college", "1ere-college", "premiere college",
+      "1college", "1 college", "college1",
+      "1annee college", "1 annee college",
+      "1ere annee college", "1ere-annee-college",
+      "السنة الأولى إعدادي", "السنة الأولى اعدادي",
+      "الأولى إعدادي", "الاولى اعدادي",
+      "اول اعدادي", "1 اعدادي", "اعدادي 1",
+      "1إعدادي", "1اعدادي"
+    ],
+    "2ème année collège": [
+      "2col", "2 col", "col2", "2c",
+      "2eme college", "2eme-college", "deuxieme college",
+      "2college", "2 college", "college2",
+      "2annee college", "2 annee college",
+      "2eme annee college", "2eme-annee-college",
+      "السنة الثانية إعدادي", "السنة الثانية اعدادي",
+      "الثانية إعدادي", "الثانية اعدادي",
+      "ثاني اعدادي", "2 اعدادي", "اعدادي 2",
+      "2إعدادي", "2اعدادي"
+    ],
+    "3ème année collège": [
+      "3col", "3 col", "col3", "3c",
+      "3eme college", "3eme-college", "troisieme college",
+      "3college", "3 college", "college3",
+      "3annee college", "3 annee college",
+      "3eme annee college", "3eme-annee-college",
+      "السنة الثالثة إعدادي", "السنة الثالثة اعدادي",
+      "الثالثة إعدادي", "الثالثة اعدادي",
+      "ثالث اعدادي", "3 اعدادي", "اعدادي 3",
+      "3إعدادي", "3اعدادي"
+    ],
+    "1ère année primaire": [
+      "1p", "1 p", "p1", "1prim", "1 prim",
+      "1ere primaire", "1ere-primaire", "premiere primaire",
+      "1primaire", "1 primaire", "primaire1",
+      "cp1", "grade1", "grade 1", "g1",
+      "السنة الأولى ابتدائي", "السنة الأولى ابتدائية",
+      "الأولى ابتدائي", "الاولى ابتدائي",
+      "1 ابتدائي", "ابتدائي 1", "1ابتدائي"
+    ],
+    "2ème année primaire": [
+      "2p", "2 p", "p2", "2prim", "2 prim",
+      "2eme primaire", "2eme-primaire", "deuxieme primaire",
+      "2primaire", "2 primaire", "primaire2",
+      "cp2", "grade2", "grade 2", "g2",
+      "السنة الثانية ابتدائي", "السنة الثانية ابتدائية",
+      "الثانية ابتدائي", "2 ابتدائي", "ابتدائي 2"
+    ],
+    "3ème année primaire": [
+      "3p", "3 p", "p3", "3prim", "3 prim",
+      "3eme primaire", "3eme-primaire", "troisieme primaire",
+      "3primaire", "3 primaire", "primaire3",
+      "ce1", "grade3", "grade 3", "g3",
+      "السنة الثالثة ابتدائي", "الثالثة ابتدائي",
+      "3 ابتدائي", "ابتدائي 3"
+    ],
+    "4ème année primaire": [
+      "4p", "4 p", "p4", "4prim", "4 prim",
+      "4eme primaire", "4eme-primaire", "quatrieme primaire",
+      "4primaire", "4 primaire", "primaire4",
+      "ce2", "grade4", "grade 4", "g4",
+      "السنة الرابعة ابتدائي", "الرابعة ابتدائي",
+      "4 ابتدائي", "ابتدائي 4"
+    ],
+    "5ème année primaire": [
+      "5p", "5 p", "p5", "5prim", "5 prim",
+      "5eme primaire", "5eme-primaire", "cinquieme primaire",
+      "5primaire", "5 primaire", "primaire5",
+      "cm1", "grade5", "grade 5", "g5",
+      "السنة الخامسة ابتدائي", "الخامسة ابتدائي",
+      "5 ابتدائي", "ابتدائي 5"
+    ],
+    "6ème année primaire": [
+      "6p", "6 p", "p6", "6prim", "6 prim",
+      "6eme primaire", "6eme-primaire", "sixieme primaire",
+      "6primaire", "6 primaire", "primaire6",
+      "cm2", "grade6", "grade 6", "g6",
+      "السنة السادسة ابتدائي", "السادسة ابتدائي",
+      "6 ابتدائي", "ابتدائي 6"
+    ]
+  },
+
+  "subjects": {
+    "Mathématiques": [
+      "math", "maths", "mathematique", "mathematiques", "mat", "mth",
+      "mathematics", "matematics", "mathmatiques", "mathem",
+      "math sci", "maths sci", "sci math",
+      "الرياضيات", "رياضيات", "رياضة",
+      "الرياضة", "رياض", "رياضيه",
+      "riyad", "riadiyat", "riyadiyat"
+    ],
+    "Sciences de la Vie et de la Terre (SVT)": [
+      "svt", "biof", "bio", "biologie", "biolog",
+      "sciences vie", "sciences-vie", "sci vie",
+      "sciences terre", "sciences-terre",
+      "sciences vie terre", "svt bio",
+      "biologie geologie", "bio geo",
+      "علوم الحياة والأرض", "علوم الحياة", "علوم الارض",
+      "علوم طبيعية", "علوم طبيعيه",
+      "علوم", "أحياء", "احياء",
+      "oloum", "ulum", "ahya"
+    ],
+    "Physique-Chimie": [
+      "phys", "physique", "pc", "chimie", "physchimie", "phys chimie",
+      "physique chimie", "physique-chimie",
+      "physics", "chemistry", "physicschimie",
+      "phy", "chim", "physc",
+      "الفيزياء والكيمياء", "فيزياء وكيمياء",
+      "فيزياء وكيميا", "الفيزياء", "فيزياء",
+      "الكيمياء", "كيمياء", "كيميا",
+      "fizya", "kimya", "fizya kimya"
+    ],
+    "Langue Française": [
+      "fr", "francais", "francaise", "french", "langue fr",
+      "langue francaise", "langue-francaise",
+      "français", "franais", "franc",
+      "litterature fr", "litt fr",
+      "expression francaise", "expression fr",
+      "fr langue", "summary fr", "cours fr", "resume fr",
+      "اللغة الفرنسية", "الفرنسية", "فرنسية",
+      "لغة فرنسية", "فرنسي", "فرنساوي",
+      "faransiya", "faransiyya"
+    ],
+    "اللغة العربية": [
+      "arab", "arabe", "arabic", "langue arabe", "langue-arabe",
+      "ar", "ara", "arab lang",
+      "arabique", "arabi",
+      "expression arabe", "expression ar",
+      "اللغة العربية", "عربية", "عربي",
+      "لغة عربية", "اللغة العربيه",
+      "العربية", "العربي",
+      "arabiya", "arabiyya", "lugha arabiya"
+    ],
+    "English": [
+      "ang", "anglais", "english", "eng", "engl",
+      "langue anglaise", "langue-anglaise",
+      "anglaise", "anglas",
+      "inglish", "english lang",
+      "expression anglaise", "expression ang",
+      "اللغة الإنجليزية", "الإنجليزية", "إنجليزية",
+      "لغة إنجليزية", "الانجليزية", "انجليزية",
+      "injlizia", "ingliziyya"
+    ],
+    "التربية الإسلامية": [
+      "islam", "islamique", "islamic", "tarbiya", "tarbya",
+      "education islamique", "education-islamique",
+      "ed islam", "islamedd",
+      "التربية الإسلامية", "تربية إسلامية",
+      "التربية الاسلامية", "تربية اسلامية",
+      "الإسلامية", "إسلامية", "اسلامية",
+      "تربية دينية", "تربية دينيه",
+      "tarbiya islamiyya", "islamiyya"
+    ],
+    "الاجتماعيات": [
+      "hist", "geo", "histgeo", "hist geo", "hist-geo",
+      "histoire", "geographie", "histoire geo",
+      "sciences sociales", "sociales",
+      "history", "geography", "social", "hg", "h g",
+      "الاجتماعيات", "اجتماعيات",
+      "التاريخ والجغرافيا", "تاريخ وجغرافيا",
+      "التاريخ", "تاريخ", "الجغرافيا", "جغرافيا",
+      "جغرافية", "تاريخية",
+      "ijtimaat", "tarikh", "jugrafiya"
+    ],
+    "الفلسفة": [
+      "philo", "philosophie", "philosophy", "phil",
+      "tronc philo", "philo lit", "pensee", "pense",
+      "الفلسفة", "فلسفة", "الفلسفه",
+      "falsafa", "falsafah", "tafkir",
+      "التفكير الفلسفي", "فكر فلسفي"
+    ],
+    "Sciences de l'Ingénieur": [
+      "info", "informatique", "si", "s i", "s-i",
+      "ingenieur", "engineering",
+      "sciences ingenieur", "sciences-ingenieur",
+      "technologie", "techno", "ti", "t i", "t-i",
+      "mecanique", "electro",
+      "علوم المهندس", "علوم الهندسة",
+      "هندسة", "مهندس",
+      "الهندسة", "تقنيات",
+      "handasah", "mohandis"
+    ],
+    "Économie Générale et Statistique": [
+      "eco", "economie", "stat", "ecostat", "eco stat",
+      "economie generale", "economie-generale",
+      "statistique", "statistiques",
+      "egs", "e g s", "eg",
+      "الاقتصاد العام والإحصاء", "اقتصاد عام واحصاء",
+      "الاقتصاد", "اقتصاد", "إحصاء", "احصاء",
+      "iqtisad", "ihsa"
+    ],
+    "Comptabilité et Mathématiques Financières": [
+      "compta", "comptabilite", "cmf", "c m f",
+      "comptabilite math", "math financieres",
+      "finances", "finance", "compt",
+      "المحاسبة والرياضيات المالية", "محاسبة ورياضيات مالية",
+      "المحاسبة", "محاسبة", "رياضيات مالية",
+      "muhasaba", "muhasabah", "maliya"
+    ],
+    "Économie et Organisation Administrative des Entreprises (EOAE)": [
+      "eoae", "e o a e", "organisation", "admin",
+      "economie entreprises", "organisation admin",
+      "gestion", "management", "oa", "oae",
+      "اقتصاد وتنظيم المقاولات", "تنظيم المقاولات",
+      "المقاولات", "مقاولات",
+      "muqawalat", "tanzim"
+    ],
+    "النشاط العلمي": [
+      "sci", "sciences", "activite sci", "activite scientifique",
+      "science primaire", "sci primaire",
+      "eveil", "eveil scientifique",
+      "النشاط العلمي", "نشاط علمي",
+      "النشاط", "نشاط", "علوم ابتدائي",
+      "علوم المستوى", "nshate", "علمي",
+      "nashat ilmi", "nashat"
+    ]
+  }
+}

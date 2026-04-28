@@ -1,0 +1,23 @@
+node_modules/
+build/
+dist/
+coverage/
+.DS_Store
+*.log
+.env*
+!.env.example
+
+# Database / cache
+*.db
+*.sqlite
+*.sqlite3
+
+# PDF source files (large binary data)
+auto_ingest_pdfs/
+
+# Generated / runtime
+metadata.json
+rag_cache.db
+
+# Editor / tool config
+.claude/
