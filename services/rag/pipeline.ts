@@ -7,10 +7,15 @@ import { openRouterRepairService } from './openRouterRepairService';
 import { pdfExtractionService } from './pdfExtractionService';
 import { supabaseRagService } from './supabaseRagService';
 import type { ChunkDraft, ChunkQualityResult } from './types';
-import { createContentHash, detectGeneratedContent } from './utils';
+import { createContentHash, detectGeneratedContent, sleep } from './utils';
 import { MIN_QUALITY_SCORE } from './chunkQualityService';
 
 const MIN_POST_REPAIR_SCORE = 0.5;
+
+// Delay between consecutive OpenRouter repair calls (free tier rate limiting)
+const REPAIR_DELAY_MS = Number(process.env.OPENROUTER_DELAY_MS ?? 1500);
+// Delay between consecutive Gemini embedding calls
+const EMBED_DELAY_MS = Number(process.env.GEMINI_EMBED_DELAY_MS ?? 800);
 
 async function classifyAndResolve(fileName: string, previewText: string) {
   const [gradeNames, subjectNames] = await Promise.all([
@@ -176,6 +181,8 @@ export async function processRagExtractionJob(jobId: string, documentId: string,
       } catch (error: any) {
         await supabaseRagService.appendJobLog(jobId, `Repair failed for chunk ${chunk.id}: ${error.message}`, 'warn');
       }
+
+      await sleep(REPAIR_DELAY_MS);
     }
 
     await supabaseRagService.updateJob(jobId, { status: 'embedding' });
@@ -192,6 +199,8 @@ export async function processRagExtractionJob(jobId: string, documentId: string,
         await supabaseRagService.markEmbeddingFailed(chunk.id, error.message);
         await supabaseRagService.appendJobLog(jobId, `Embedding failed for chunk ${chunk.id}: ${error.message}`, 'warn');
       }
+
+      await sleep(EMBED_DELAY_MS);
     }
 
     await supabaseRagService.updateJob(jobId, {
