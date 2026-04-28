@@ -68,7 +68,7 @@ export function TaskCenter({ supabaseUrl, supabaseKey, isSupabaseEnabled }: Task
                name: cyc.name,
                children: cycGrades.map(g => {
                   const nodeNameLower = g.name.toLowerCase();
-                  const isBac = nodeNameLower.includes('bac') || g.name.includes('Ø§Ù„Ø¨ÙƒØ§Ù„ÙˆØ±ÙŠØ§');
+                  const isBac = nodeNameLower.includes('bac') || g.name.includes('البكالوريا');
                   
                   // For Bac grades, we might want to show Sections -> Tracks
                   if (isBac) {
@@ -183,7 +183,7 @@ export function TaskCenter({ supabaseUrl, supabaseKey, isSupabaseEnabled }: Task
         desc: node.children?.length > 0 ? 'Subjects are mapped.' : 'Identify which subjects are taught in this exact grade.',
         prompt: `Generate a JSON array of official subjects for ${node.name}. Return only [{name}]. Subject names must be canonical and reusable across grades.`
       });
-      if (node.name.toLowerCase().includes('bac') || node.name.includes('Ø§Ù„Ø¨ÙƒØ§Ù„ÙˆØ±ÙŠØ§')) {
+      if (node.name.toLowerCase().includes('bac') || node.name.includes('البكالوريا')) {
          tasks.push({
            title: 'Verify Sections & Tracks',
            status: node.children?.length > 0 ? 'completed' : 'actionable',
