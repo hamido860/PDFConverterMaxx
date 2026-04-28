@@ -12,9 +12,18 @@ const REPAIR_MODELS = (process.env.OPENROUTER_REPAIR_MODELS || 'openai/gpt-4.1,q
   .map(model => model.trim())
   .filter(Boolean);
 
+// Circuit breaker: once a 401 is seen, skip all further calls for the
+// lifetime of this process to avoid flooding logs with repeated auth failures.
+let circuitOpen = false;
+let circuitOpenReason = '';
+
 async function callOpenRouterJson<T>(models: string[], messages: Array<{ role: string; content: string }>): Promise<T> {
   if (!OPENROUTER_KEY) {
     throw new Error('OPENROUTER_KEY is not configured');
+  }
+
+  if (circuitOpen) {
+    throw new Error(`OpenRouter circuit open — ${circuitOpenReason}`);
   }
 
   const response = await fetch(OPENROUTER_URL, {
@@ -40,7 +49,14 @@ async function callOpenRouterJson<T>(models: string[], messages: Array<{ role: s
 
   if (!response.ok) {
     const body = await response.text().catch(() => '');
-    throw new Error(`OpenRouter ${response.status}: ${body.slice(0, 400)}`);
+    const msg = `OpenRouter ${response.status}: ${body.slice(0, 400)}`;
+    // 401 = bad key, 403 = no credits/account issue — no point retrying
+    if (response.status === 401 || response.status === 403) {
+      circuitOpen = true;
+      circuitOpenReason = msg;
+      console.error(`[openRouterRepairService] Circuit opened: ${msg}`);
+    }
+    throw new Error(msg);
   }
 
   const payload = await response.json();
