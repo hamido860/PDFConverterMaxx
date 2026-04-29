@@ -2780,35 +2780,52 @@ Rules:
                   </>
                 )}
 
-                {activeMainTab === 'chunkreview' && (
-                  <motion.div
-                    key="chunkreview"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    className="max-w-[1500px] mx-auto pb-12"
-                  >
-                    <RagRepairAdmin
-                      view="chunk-review"
-                      onNavigate={(nextView) => navigateMainTab(nextView === 'chunk-review' ? 'chunkreview' : 'extractionjobs')}
-                    />
-                  </motion.div>
-                )}
+              </motion.div>
+            )}
 
-                {activeMainTab === 'extractionjobs' && (
-                  <motion.div
-                    key="extractionjobs"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    className="max-w-[1500px] mx-auto pb-12"
-                  >
-                    <RagRepairAdmin
-                      view="extraction-jobs"
-                      onNavigate={(nextView) => navigateMainTab(nextView === 'chunk-review' ? 'chunkreview' : 'extractionjobs')}
-                    />
-                  </motion.div>
-                )}
+            {activeMainTab === 'taskcenter' && (
+              <motion.div
+                key="taskcenter"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="max-w-[1500px] mx-auto pb-12"
+              >
+                <TaskCenter
+                  supabaseUrl={supabaseUrl}
+                  supabaseKey={supabaseKey}
+                  isSupabaseEnabled={isSupabaseEnabled}
+                />
+              </motion.div>
+            )}
+
+            {activeMainTab === 'chunkreview' && (
+              <motion.div
+                key="chunkreview"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="max-w-[1500px] mx-auto pb-12"
+              >
+                <RagRepairAdmin
+                  view="chunk-review"
+                  onNavigate={(nextView) => navigateMainTab(nextView === 'chunk-review' ? 'chunkreview' : 'extractionjobs')}
+                />
+              </motion.div>
+            )}
+
+            {activeMainTab === 'extractionjobs' && (
+              <motion.div
+                key="extractionjobs"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="max-w-[1500px] mx-auto pb-12"
+              >
+                <RagRepairAdmin
+                  view="extraction-jobs"
+                  onNavigate={(nextView) => navigateMainTab(nextView === 'chunk-review' ? 'chunkreview' : 'extractionjobs')}
+                />
               </motion.div>
             )}
           </AnimatePresence>
