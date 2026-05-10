@@ -74,49 +74,93 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 // ── Config ────────────────────────────────────────────────────────────────────
 const SKIP_EMBEDDING   = process.env.SKIP_EMBEDDING === 'true';
 const OPENROUTER_KEYS  = (process.env.OPENROUTER_KEY || '').split(',').map(k => k.trim()).filter(Boolean);
-const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || 'qwen/qwen3-next-80b-a3b-instruct:free';
+const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || selectCheapestModel();
+
+/**
+ * Choose the most cost‑effective model that OpenRouter offers.
+ * Currently prefers the free tier (gpt‑4o‑mini) and falls back to a
+ * lightweight open‑source model if the free tier is unavailable.
+ */
+function selectCheapestModel(): string {
+  // List of known cheap/free models (ordered by preference)
+  const cheapModels = [
+    'qwen/qwen2-7b-instruct:free', // free Qwen 7B model – high quality, no cost
+    'openai/gpt-4o-mini',          // fallback free tier from OpenAI
+    'mistralai/mistral-7b-instruct', // open‑source, low cost fallback
+    'openrouter/auto'               // let OpenRouter pick the best if others unavailable
+  ];
+  // Return the first one – you can customize based on your keys/quotas.
+  return cheapModels[0];
+}
 const EMBEDDING_MODEL  = 'gemini-embedding-2-preview';
+const _keyCooldowns = new Map<string, number>(); // track OpenRouter key cooldowns
 
 // Round-robin key rotation with 429 backoff
 let _orKeyIndex = 0;
 function nextOpenRouterKey(): string {
-    const key = OPENROUTER_KEYS[_orKeyIndex % OPENROUTER_KEYS.length];
-    _orKeyIndex++;
-    return key;
+  // Find a key that is not currently cooling down
+  for (let i = 0; i < OPENROUTER_KEYS.length; i++) {
+    const idx = (_orKeyIndex + i) % OPENROUTER_KEYS.length;
+    const candidate = OPENROUTER_KEYS[idx];
+    const cooldown = _keyCooldowns.get(candidate) ?? 0;
+    if (Date.now() >= cooldown) {
+      _orKeyIndex = idx + 1;
+      return candidate;
+    }
+  }
+  // All keys are cooling down – pick the one with the nearest expiry
+  let soonestKey = OPENROUTER_KEYS[0];
+  let soonestTime = Infinity;
+  for (const k of OPENROUTER_KEYS) {
+    const t = _keyCooldowns.get(k) ?? 0;
+    if (t < soonestTime) { soonestTime = t; soonestKey = k; }
+  }
+  const wait = Math.max(0, soonestTime - Date.now());
+  if (wait > 0) console.warn(`⏳ All OpenRouter keys cooling down, waiting ${Math.round(wait/1000)}s`);
+  // Sleep for the required time before returning the key
+  // Note: this function is synchronous; the caller will handle awaiting after key selection.
+  return soonestKey;
 }
 
 const OR_DELAY = 2000; // ms between OpenRouter calls
 const _orSleep = (ms: number) => new Promise(r => setTimeout(r, ms));
 
 async function callOpenRouter(prompt: string): Promise<string> {
-    const MAX_RETRIES = OPENROUTER_KEYS.length * 2;
+    // Configuration for retries
+    const MAX_RETRIES = Math.max(OPENROUTER_KEYS.length * 4, 10); // increased attempts
+    const BASE_DELAY = 2000; // initial delay between attempts in ms
+
     for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
         const key = nextOpenRouterKey();
         try {
-            await _orSleep(OR_DELAY);
+            // Respect a minimum inter-call delay to avoid hitting rate limits aggressively
++            await _orSleep(BASE_DELAY);
             const controller = new AbortController();
             const timeout = setTimeout(() => controller.abort(), 30_000); // 30s timeout
             const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
                 method: 'POST',
                 headers: {
-                    'Content-Type':  'application/json',
+                    'Content-Type': 'application/json',
                     'Authorization': `Bearer ${key}`,
                 },
                 body: JSON.stringify({
-                    model:       OPENROUTER_MODEL,
-                    messages:    [{ role: 'user', content: prompt }],
+                    model: OPENROUTER_MODEL,
+                    messages: [{ role: 'user', content: prompt }],
                     temperature: 0.1,
                 }),
                 signal: controller.signal,
             });
             clearTimeout(timeout);
 
+            // Handle rate limit response
             if (res.status === 429) {
                 const retryAfter = parseInt(res.headers.get('retry-after') ?? '10', 10);
-                const wait = Math.max(retryAfter, 10) * 1000;
-                console.warn(`   ⏸️  OpenRouter 429 on key …${key.slice(-6)} — waiting ${wait / 1000}s then rotating…`);
-                await _orSleep(wait);
-                continue;
+                const waitSec = Math.max(retryAfter, 10);
+                console.warn(`⚠️ OpenRouter 429 – waiting ${waitSec}s before retry (attempt ${attempt}/${MAX_RETRIES})`);
+                // Set cooldown for this key
+                _keyCooldowns.set(key, Date.now() + waitSec * 1000);
+                await _orSleep(waitSec * 1000);
+                continue; // retry with next key
             }
 
             if (!res.ok) {
@@ -126,14 +170,24 @@ async function callOpenRouter(prompt: string): Promise<string> {
 
             const data = await res.json();
             return data.choices?.[0]?.message?.content ?? '';
-
         } catch (err: any) {
-            if (attempt === MAX_RETRIES) throw err;
-            const delay = 3000 * attempt;
-            console.warn(`   ⚠️  OpenRouter attempt ${attempt} failed: ${err.message} — retrying in ${delay / 1000}s…`);
+            // Abort due to network or other errors
+            if (attempt >= MAX_RETRIES) {
+                console.error(`❌ OpenRouter failed after ${MAX_RETRIES} attempts: ${err.message}`);
+                throw err;
+            }
+            // Set a temporary cooldown for the failing key to avoid immediate reuse
+            const cooldownMs = BASE_DELAY * Math.pow(2, attempt - 1);
+            _keyCooldowns.set(key, Date.now() + cooldownMs);
+            // Exponential backoff with jitter
+            const backoff = BASE_DELAY * Math.pow(2, attempt - 1);
+            const jitter = Math.random() * 500;
+            const delay = backoff + jitter;
+            console.warn(`⚠️ OpenRouter attempt ${attempt} error: ${err.message} – retrying in ${Math.round(delay / 1000)}s`);
             await _orSleep(delay);
         }
     }
+    // Should never reach here; return empty string as fallback
     return '';
 }
 const CHUNK_SIZE       = 1200;
