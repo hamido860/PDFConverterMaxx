@@ -1,46 +1,78 @@
 services:
-
+  # ── Frontend (Vite dev server) ────────────────────────────────────────────────
   app:
     build:
       context: .
-      dockerfile: Dockerfile
+      target: dev
+    command: npm run dev
     ports:
       - "3001:3001"
     volumes:
       - .:/app
-      # keep container node_modules separate from Windows host
-      - app_node_modules:/app/node_modules
-      - ./auto_ingest_pdfs:/app/auto_ingest_pdfs
-    env_file: .env
+      - /app/node_modules         # don't override node_modules with host
+    env_file:
+      - .env
     environment:
-      # Vite HMR needs to know the public host for WebSocket
-      - VITE_HMR_HOST=localhost
-      # Point Ollama at the compose service, not localhost
-      - OLLAMA_URL=http://ollama:11434
+      - NODE_ENV=development
     depends_on:
-      - ollama
-    restart: unless-stopped
+      - api
+    networks:
+      - pdf_net
 
+  # ── Express API server ────────────────────────────────────────────────────────
+  api:
+    build:
+      context: .
+      target: dev
+    command: npm run server
+    ports:
+      - "3002:3002"
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - ./auto_ingest_pdfs:/app/auto_ingest_pdfs
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=development
+      - STANDALONE_API=true
+      - SERVER_PORT=3002
+    networks:
+      - pdf_net
+
+  # ── Python embedder (run on demand, not always-on) ───────────────────────────
   embedder:
     build:
       context: .
-      dockerfile: Dockerfile.embedder
+      target: dev
+    command: python embed-local.py
     volumes:
       - .:/app
-      # cache the ~280 MB sentence-transformers model between runs
-      - embedder_model_cache:/root/.cache/huggingface
-    env_file: .env
-    restart: unless-stopped
+      - /app/node_modules
+      - embedder_cache:/root/.cache   # cache sentence-transformer model downloads
+    env_file:
+      - .env
+    networks:
+      - pdf_net
+    profiles:
+      - embed    # only starts with: docker compose --profile embed up
 
-  ollama:
-    image: ollama/ollama:latest
+  # ── ChromaDB (local vector store) ────────────────────────────────────────────
+  chroma:
+    image: chromadb/chroma:latest
     ports:
-      - "11434:11434"
+      - "8000:8000"
     volumes:
-      - ollama_data:/root/.ollama
-    restart: unless-stopped
+      - chroma_data:/chroma/chroma
+    environment:
+      - ANONYMIZED_TELEMETRY=false
+    networks:
+      - pdf_net
 
 volumes:
-  app_node_modules:
-  embedder_model_cache:
-  ollama_data:
+  chroma_data:
+  embedder_cache:
+
+networks:
+  pdf_net:
+    driver: bridge

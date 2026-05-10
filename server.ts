@@ -522,34 +522,49 @@ app.post('/api/rag/chunks/:chunkId/test-retrieval', async (req, res) => {
   }
 });
 // â”€â”€ BACKGROUND AUTO-INGEST LOOP â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-let isBackgroundIngesting = false;
-setInterval(async () => {
-  if (isBackgroundIngesting) return;
-  isBackgroundIngesting = true;
-  try {
-    const files = collectPdfs(rawIngestDir);
-    // Process files one by one
-    for (const file of files) {
-      const absolutePath = path.join(rawIngestDir, file);
-      if (fs.existsSync(absolutePath)) {
-        console.log(`[auto-ingest] Background processing started for: ${file}`);
-        const result = await ingest(absolutePath);
-        
-        // ingest() natively marks it as .done.pdf on 'success' or .error.pdf on crash.
-        // However, if it returns 'duplicate', it skips renaming it. We need to rename it manually 
-        // to prevent infinite loops.
-        if (result.status === 'duplicate') {
-           const donePath = absolutePath.replace(/\.pdf$/i, '.done.pdf');
-           try { fs.renameSync(absolutePath, donePath); console.log(`[auto-ingest] Marked duplicate as done: ${file}`); } catch {}
-        }
+// Set DISABLE_AUTO_INGEST=true in .env to skip this loop (prevents OOM in dev when large PDFs sit
+// in auto_ingest_pdfs — pdf-parse loads the whole file into the Vite process heap).
+// When enabled, each file is spawned in a separate tsx process with its own memory cap so a
+// single large PDF cannot crash the main server.
+if (process.env.DISABLE_AUTO_INGEST !== 'true') {
+  let isBackgroundIngesting = false;
+  setInterval(async () => {
+    if (isBackgroundIngesting) return;
+    isBackgroundIngesting = true;
+    try {
+      const files = collectPdfs(rawIngestDir);
+      for (const file of files) {
+        const absolutePath = path.join(rawIngestDir, file);
+        if (!fs.existsSync(absolutePath)) continue;
+
+        console.log(`[auto-ingest] Spawning subprocess for: ${file}`);
+        await new Promise<void>((resolve) => {
+          const npx = process.platform === 'win32' ? 'npx.cmd' : 'npx';
+          const child = spawn(npx, ['tsx', 'ingest-worker.ts', absolutePath], {
+            env: { ...process.env, NODE_OPTIONS: '--max-old-space-size=3072' },
+            cwd: process.cwd(),
+            stdio: 'inherit',
+            shell: false,
+          });
+          child.on('exit', (code) => {
+            if (code !== 0) console.warn(`[auto-ingest] Worker exited with code ${code} for: ${file}`);
+            resolve();
+          });
+          child.on('error', (err) => {
+            console.error(`[auto-ingest] Worker spawn error for ${file}:`, err.message);
+            resolve();
+          });
+        });
       }
+    } catch (err: any) {
+      console.error('[auto-ingest] Background loop error:', err.message);
+    } finally {
+      isBackgroundIngesting = false;
     }
-  } catch (err: any) {
-    console.error('[auto-ingest] Background loop error:', err.message);
-  } finally {
-    isBackgroundIngesting = false;
-  }
-}, 5000); // Poll every 5 seconds
+  }, 5000);
+} else {
+  console.log('[auto-ingest] Background loop disabled (DISABLE_AUTO_INGEST=true). Use the UI upload to process PDFs.');
+}
 
 // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Listen mode is OPT-IN. By default this module just exports `app`, and Vite

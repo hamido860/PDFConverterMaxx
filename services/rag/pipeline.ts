@@ -13,9 +13,9 @@ import { MIN_QUALITY_SCORE } from './chunkQualityService';
 const MIN_POST_REPAIR_SCORE = 0.5;
 
 // Delay between consecutive OpenRouter repair calls (free tier rate limiting)
-const REPAIR_DELAY_MS = Number(process.env.OPENROUTER_DELAY_MS ?? 1500);
+const REPAIR_DELAY_MS = Number(process.env.OPENROUTER_DELAY_MS ?? 5000);
 // Delay between consecutive Gemini embedding calls
-const EMBED_DELAY_MS = Number(process.env.GEMINI_EMBED_DELAY_MS ?? 800);
+const EMBED_DELAY_MS = Number(process.env.GEMINI_EMBED_DELAY_MS ?? 5000);
 
 async function classifyAndResolve(fileName: string, previewText: string) {
   const [gradeNames, subjectNames] = await Promise.all([

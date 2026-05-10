@@ -47,6 +47,22 @@ export default defineConfig(({ mode }) => {
         '@': path.resolve(__dirname, '.'),
       },
     },
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            if (id.includes('node_modules')) {
+              if (id.includes('react') || id.includes('scheduler')) return 'react-vendor';
+              if (id.includes('pdfjs-dist')) return 'pdf-vendor';
+              if (id.includes('@google/genai')) return 'ai-vendor';
+              if (id.includes('@supabase/supabase-js')) return 'supabase-vendor';
+              if (id.includes('lucide-react')) return 'icons-vendor';
+              if (id.includes('motion')) return 'motion-vendor';
+            }
+          },
+        },
+      },
+    },
     server: {
       // HMR is disabled in AI Studio via DISABLE_HMR env var.
       hmr: process.env.DISABLE_HMR !== 'true',
