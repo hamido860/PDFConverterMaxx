@@ -1,7 +1,7 @@
 {
-  "name": "react-example",
+  "name": "pdfconvertermaxx",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "cross-env NODE_OPTIONS=--max-old-space-size=4096 vite --port=3001 --host=0.0.0.0",
