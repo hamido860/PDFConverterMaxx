@@ -526,7 +526,9 @@ export async function ingest(filePath: string): Promise<IngestResult> {
                 const content = await page.getTextContent();
                 const pageText = content.items.map((item: any) => item.str).join(' ');
                 rawText += pageText + '\n\n';
+                page.cleanup();
             }
+            doc.destroy();
         } catch (pdfErr: any) {
             console.error(`❌ PDF parse failed for ${fileName}:`, pdfErr.message);
             return { status: 'error', message: pdfErr.message };

@@ -225,6 +225,30 @@ app.get('/api/auto-ingest', (req, res) => {
   res.json({ files });
 });
 
+app.get('/api/batch-status', (req, res) => {
+  let total = 0;
+  let done = 0;
+  let errorCount = 0;
+  let pending = 0;
+
+  function scan(currentPath: string) {
+    if (!fs.existsSync(currentPath)) return;
+    for (const entry of fs.readdirSync(currentPath, { withFileTypes: true })) {
+      const fullPath = path.join(currentPath, entry.name);
+      if (entry.isDirectory()) {
+        scan(fullPath);
+      } else if (entry.isFile()) {
+        if (entry.name.endsWith('.done.pdf')) { total++; done++; }
+        else if (entry.name.endsWith('.error.pdf')) { total++; errorCount++; }
+        else if (entry.name.endsWith('.pdf')) { total++; pending++; }
+      }
+    }
+  }
+
+  scan(rawIngestDir);
+  res.json({ total, done, error: errorCount, pending });
+});
+
 app.get('/api/download', (req, res) => {
   const file = req.query.file as string;
   if (file && file.endsWith('.pdf') && !file.includes('..')) {
@@ -358,7 +382,22 @@ app.get('/api/embed-log', (_req, res) => {
 // RAG Chunk Repair & Validation API
 app.post('/api/rag/upload', express.raw({ type: "application/pdf", limit: "100mb" }), async (req, res) => {
   try {
-    const fileName = (req.headers["x-filename"] as string) || `rag-upload-${Date.now()}.pdf`;
+    const rawFileName = (req.headers["x-filename"] as string) || `rag-upload-${Date.now()}.pdf`;
+    let fileName = rawFileName;
+    try {
+      fileName = decodeURIComponent(rawFileName);
+    } catch {
+      fileName = rawFileName;
+    }
+    const metadataHeader = req.headers["x-document-metadata"] as string | undefined;
+    let metadata: Record<string, any> = {};
+    if (metadataHeader) {
+      try {
+        metadata = JSON.parse(decodeURIComponent(metadataHeader));
+      } catch {
+        metadata = {};
+      }
+    }
     const safeName = path.basename(fileName).replace(/[^\w.\-\s\u0600-\u06FF]/g, '_');
     const filePath = path.join(RAG_UPLOAD_DIR, safeName);
 
@@ -369,6 +408,7 @@ app.post('/api/rag/upload', express.raw({ type: "application/pdf", limit: "100mb
       filePath,
       fileSize: Buffer.byteLength(req.body),
       mimeType: 'application/pdf',
+      metadata,
     });
 
     launchRagJob(job.id, document.id, filePath);
@@ -665,4 +705,3 @@ function startServer(port: number): void {
 if (process.env.STANDALONE_API === 'true') {
   startServer(SERVER_PORT);
 }
-

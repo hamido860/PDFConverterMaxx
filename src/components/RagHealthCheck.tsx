@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Activity, AlertCircle, CheckCircle2, Database, Link, RefreshCw, ServerCrash, ShieldCheck } from 'lucide-react';
+import { Activity, AlertCircle, CheckCircle2, Database, Link, RefreshCw, ServerCrash, ShieldCheck, Search } from 'lucide-react';
 import { getSupabase } from '../utils/supabaseClient';
 
 export function RagHealthCheck() {

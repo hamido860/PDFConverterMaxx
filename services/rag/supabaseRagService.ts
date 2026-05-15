@@ -81,6 +81,7 @@ export const supabaseRagService = {
     filePath: string;
     fileSize: number;
     mimeType: string;
+    metadata?: Record<string, any>;
   }) {
     const now = new Date().toISOString();
     const { data: document, error: documentError } = await supabase
@@ -91,7 +92,10 @@ export const supabaseRagService = {
         file_path: input.filePath,
         file_size: input.fileSize,
         mime_type: input.mimeType,
-        metadata: {},
+        title: input.metadata?.topic ?? input.metadata?.topicTitle ?? null,
+        detected_grade_name: input.metadata?.grade ?? input.metadata?.gradeLabel ?? null,
+        detected_subject_name: input.metadata?.subject ?? input.metadata?.subjectLabel ?? null,
+        metadata: input.metadata ?? {},
         created_at: now,
         updated_at: now,
       })
@@ -245,7 +249,7 @@ export const supabaseRagService = {
       supabase.from('rag_documents').select('id, filename').order('filename'),
       supabase.from('grades').select('id, name').order('name'),
       supabase.from('subjects').select('id, name').order('name'),
-      supabase.from('topics').select('id, title').order('title').limit(2000),
+      supabase.from('topics').select('id, title, grade_id, subject_id, subjects(name)').order('title').limit(2000),
     ]);
 
     return {

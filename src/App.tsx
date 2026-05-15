@@ -22,6 +22,7 @@ import {
   loadPdfJsModule,
   loadSupabaseModule,
 } from './lib/runtimeLoaders';
+import { BatchIngestProgress } from './components/BatchIngestProgress';
 
 const MAX_FILE_SIZE_MB = 60;
 const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
@@ -66,6 +67,9 @@ const RagRepairAdmin = React.lazy(() =>
 );
 const RagHealthCheck = React.lazy(() =>
   import('./components/RagHealthCheck').then((module) => ({ default: module.RagHealthCheck }))
+);
+const DocumentWorkspace = React.lazy(() =>
+  import('./components/DocumentWorkspace').then((module) => ({ default: module.DocumentWorkspace }))
 );
 
 function LazySectionFallback({ label }: { label: string }) {
@@ -1396,15 +1400,26 @@ export default function App() {
 
           <nav className="space-y-1">
             <button 
-              onClick={() => navigateMainTab('dashboard')} 
+              onClick={() => navigateMainTab('documents')} 
               className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl border transition-all group ${
-                activeMainTab === 'dashboard' 
+                activeMainTab === 'documents' || activeMainTab === 'dashboard' 
                   ? 'bg-white/5 text-[var(--color-accent)] border-[var(--color-accent)]/20' 
                   : 'text-white/40 hover:text-white hover:bg-white/5 border-transparent'
               }`}
             >
               <LayoutDashboard className="w-4 h-4" />
-              <span className="text-sm font-medium">Dashboard</span>
+              <span className="text-sm font-medium">Documents Workspace</span>
+            </button>
+            <button 
+              onClick={() => navigateMainTab('reviewqueue')} 
+              className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl border transition-all group ${
+                activeMainTab === 'reviewqueue' || activeMainTab === 'chunkreview' 
+                  ? 'bg-white/5 text-[var(--color-accent)] border-[var(--color-accent)]/20' 
+                  : 'text-white/40 hover:text-white hover:bg-white/5 border-transparent'
+              }`}
+            >
+              <Eye className="w-4 h-4" />
+              <span className="text-sm font-medium">Review Queue</span>
             </button>
             <button 
               onClick={() => navigateMainTab('scraper')} 
@@ -1415,51 +1430,18 @@ export default function App() {
               }`}
             >
               <Layers className="w-4 h-4" />
-              <span className="text-sm font-medium">Upload & Scraper</span>
+              <span className="text-sm font-medium">Scraper</span>
             </button>
             <button 
-              onClick={() => navigateMainTab('extractionjobs')} 
+              onClick={() => navigateMainTab('knowledgebase')} 
               className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl border transition-all group ${
-                activeMainTab === 'extractionjobs' 
-                  ? 'bg-white/5 text-[var(--color-accent)] border-[var(--color-accent)]/20' 
-                  : 'text-white/40 hover:text-white hover:bg-white/5 border-transparent'
-              }`}
-            >
-              <BrainCircuit className="w-4 h-4" />
-              <span className="text-sm font-medium">Extraction Jobs</span>
-            </button>
-            <button 
-              onClick={() => navigateMainTab('chunkreview')} 
-              className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl border transition-all group ${
-                activeMainTab === 'chunkreview' 
-                  ? 'bg-white/5 text-[var(--color-accent)] border-[var(--color-accent)]/20' 
-                  : 'text-white/40 hover:text-white hover:bg-white/5 border-transparent'
-              }`}
-            >
-              <Eye className="w-4 h-4" />
-              <span className="text-sm font-medium">Chunk Review</span>
-            </button>
-            <button 
-              onClick={() => navigateMainTab('raghealth')} 
-              className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl border transition-all group ${
-                activeMainTab === 'raghealth' 
-                  ? 'bg-white/5 text-[var(--color-accent)] border-[var(--color-accent)]/20' 
-                  : 'text-white/40 hover:text-white hover:bg-white/5 border-transparent'
-              }`}
-            >
-              <Activity className="w-4 h-4" />
-              <span className="text-sm font-medium">RAG Health</span>
-            </button>
-            <button 
-              onClick={() => navigateMainTab('publish')} 
-              className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl border transition-all group ${
-                activeMainTab === 'publish' 
+                activeMainTab === 'knowledgebase' || activeMainTab === 'raghealth' 
                   ? 'bg-white/5 text-[var(--color-accent)] border-[var(--color-accent)]/20' 
                   : 'text-white/40 hover:text-white hover:bg-white/5 border-transparent'
               }`}
             >
               <Database className="w-4 h-4" />
-              <span className="text-sm font-medium">Supabase Publish</span>
+              <span className="text-sm font-medium">Knowledge Base</span>
             </button>
             <button 
               onClick={() => navigateMainTab('settings')} 
@@ -1536,11 +1518,10 @@ export default function App() {
               <Menu className="w-6 h-6" />
             </button>
             <h2 className="text-xs sm:text-sm font-medium text-white/70 truncate whitespace-nowrap overflow-hidden max-w-[200px] sm:max-w-none">
-              Workspace / {['publish', 'chunkreview', 'extractionjobs', 'scraper'].includes(activeMainTab) ? 'Admin' : 'Project'} / <span className="text-white">
-                 {activeMainTab === 'publish' ? 'Supabase Publish' : 
-                 activeMainTab === 'chunkreview' ? 'Chunk Review' :
-                 activeMainTab === 'extractionjobs' ? 'Extraction Jobs' :
-                 activeMainTab === 'raghealth' ? 'RAG Health' :
+              Workspace / {['settings'].includes(activeMainTab) ? 'Admin' : 'Project'} / <span className="text-white">
+                 {activeMainTab === 'documents' || activeMainTab === 'dashboard' ? 'Documents Workspace' : 
+                 activeMainTab === 'reviewqueue' || activeMainTab === 'chunkreview' ? 'Review Queue' :
+                 activeMainTab === 'knowledgebase' || activeMainTab === 'raghealth' || activeMainTab === 'database' ? 'Knowledge Base' :
                  activeMainTab === 'scraper' ? 'Upload & Scraper' :
                  activeMainTab === 'settings' ? 'Configuration' : 'Dashboard'}
               </span>
@@ -2601,7 +2582,7 @@ export default function App() {
               </motion.div>
             )}
 
-            {activeMainTab === 'chunkreview' && (
+            {(activeMainTab === 'reviewqueue' || activeMainTab === 'chunkreview') && (
               <motion.div
                 key="chunkreview"
                 initial={{ opacity: 0, y: 10 }}
@@ -2609,16 +2590,16 @@ export default function App() {
                 exit={{ opacity: 0, y: -10 }}
                 className="max-w-[1500px] mx-auto pb-12"
               >
-                <React.Suspense fallback={<LazySectionFallback label="Chunk Review" />}>
+                <React.Suspense fallback={<LazySectionFallback label="Review Queue" />}>
                   <RagRepairAdmin
                     view="chunk-review"
-                    onNavigate={(nextView) => navigateMainTab(nextView === 'chunk-review' ? 'chunkreview' : 'extractionjobs')}
+                    onNavigate={(nextView) => navigateMainTab(nextView === 'chunk-review' ? 'reviewqueue' : 'documents')}
                   />
                 </React.Suspense>
               </motion.div>
             )}
 
-            {activeMainTab === 'raghealth' && (
+            {(activeMainTab === 'knowledgebase' || activeMainTab === 'raghealth') && (
               <motion.div
                 key="raghealth"
                 initial={{ opacity: 0, y: 10 }}
@@ -2626,25 +2607,22 @@ export default function App() {
                 exit={{ opacity: 0, y: -10 }}
                 className="max-w-[1500px] mx-auto pb-12"
               >
-                <React.Suspense fallback={<LazySectionFallback label="RAG Health Check" />}>
+                <React.Suspense fallback={<LazySectionFallback label="Knowledge Base Health" />}>
                   <RagHealthCheck />
                 </React.Suspense>
               </motion.div>
             )}
 
-            {activeMainTab === 'extractionjobs' && (
+            {(activeMainTab === 'documents' || activeMainTab === 'dashboard') && (
               <motion.div
-                key="extractionjobs"
+                key="documents"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 className="max-w-[1500px] mx-auto pb-12"
               >
-                <React.Suspense fallback={<LazySectionFallback label="Extraction Jobs" />}>
-                  <RagRepairAdmin
-                    view="extraction-jobs"
-                    onNavigate={(nextView) => navigateMainTab(nextView === 'chunk-review' ? 'chunkreview' : 'extractionjobs')}
-                  />
+                <React.Suspense fallback={<LazySectionFallback label="Documents Workspace" />}>
+                  <DocumentWorkspace />
                 </React.Suspense>
               </motion.div>
             )}
@@ -2896,6 +2874,7 @@ export default function App() {
           </div>
           )}
         </AnimatePresence>
+        <BatchIngestProgress />
       </div>
     </div>
   );
