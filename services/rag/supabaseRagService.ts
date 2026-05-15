@@ -416,25 +416,26 @@ export const supabaseRagService = {
 
   async getActiveEmbeddings(documentId?: string) {
     let query = supabase
-      .from('rag_embeddings')
-      .select('id, chunk_id, embedding, model, rag_chunks!inner(id, title, content, document_id)')
+      .from('rag_chunks')
+      .select('id, title, content, document_id, embedding')
+      .not('embedding', 'is', null)
       .eq('is_active', true);
 
     if (documentId) {
-      query = query.eq('rag_chunks.document_id', documentId);
+      query = query.eq('document_id', documentId);
     }
 
     const { data, error } = await query.limit(1000);
     if (error) throw error;
 
-    return (data ?? []).map(row => ({
+    return (data ?? []).map((row: any) => ({
       id: row.id,
-      chunkId: row.chunk_id,
+      chunkId: row.id,
       embedding: parseVector(row.embedding),
-      model: row.model,
-      title: (row as any).rag_chunks?.title ?? null,
-      content: (row as any).rag_chunks?.content ?? '',
-      documentId: (row as any).rag_chunks?.document_id ?? null,
+      model: row.embedding_model || 'unknown',
+      title: row.title ?? null,
+      content: row.content ?? '',
+      documentId: row.document_id ?? null,
     }));
   },
 

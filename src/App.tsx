@@ -1,4 +1,4 @@
-﻿import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { 
   Upload, File, Trash2, Download, AlertCircle, FilePlus, 
   ArrowUp, ArrowDown, Sparkles, FileJson, Database, 
@@ -63,6 +63,9 @@ const TaskCenter = React.lazy(() =>
 );
 const RagRepairAdmin = React.lazy(() =>
   import('./components/RagRepairAdmin').then((module) => ({ default: module.RagRepairAdmin }))
+);
+const RagHealthCheck = React.lazy(() =>
+  import('./components/RagHealthCheck').then((module) => ({ default: module.RagHealthCheck }))
 );
 
 function LazySectionFallback({ label }: { label: string }) {
@@ -211,14 +214,7 @@ export default function App() {
     return supabaseClientRef.current;
   };
 
-  // Auto-fetch explorer data when tab becomes active
-  useEffect(() => {
-    if (activeMainTab === 'database' && activeMonitorTab === 'explorer' && supabaseExplorerData.length === 0 && !isFetchingExplorerData) {
-      if (isSupabaseEnabled && supabaseUrl && supabaseKey) {
-        fetchExplorerData();
-      }
-    }
-  }, [activeMonitorTab, activeMainTab, isSupabaseEnabled]);
+
 
   // Keep isAutoPilotingRef in sync with state for use inside intervals
   useEffect(() => {
@@ -1393,8 +1389,8 @@ export default function App() {
               <AppWindow className="w-6 h-6" />
             </div>
             <div>
-              <h1 className="text-lg font-bold tracking-tight">Flux PDF</h1>
-              <span className="text-[10px] text-white/40 uppercase tracking-[2px]">Combiner Pro</span>
+              <h1 className="text-lg font-bold tracking-tight">PDFConverterMaxx</h1>
+              <span className="text-[10px] text-white/40 uppercase tracking-[2px]">Pipeline</span>
             </div>
           </div>
 
@@ -1408,51 +1404,29 @@ export default function App() {
               }`}
             >
               <LayoutDashboard className="w-4 h-4" />
-              <span className="text-sm font-medium">File Upload</span>
+              <span className="text-sm font-medium">Dashboard</span>
             </button>
             <button 
-              onClick={() => navigateMainTab('processing')} 
+              onClick={() => navigateMainTab('scraper')} 
               className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl border transition-all group ${
-                activeMainTab === 'processing' 
+                activeMainTab === 'scraper' 
                   ? 'bg-white/5 text-[var(--color-accent)] border-[var(--color-accent)]/20' 
                   : 'text-white/40 hover:text-white hover:bg-white/5 border-transparent'
               }`}
             >
               <Layers className="w-4 h-4" />
-              <span className="text-sm font-medium">AI Pipeline</span>
+              <span className="text-sm font-medium">Upload & Scraper</span>
             </button>
             <button 
-              onClick={() => navigateMainTab('settings')} 
+              onClick={() => navigateMainTab('extractionjobs')} 
               className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl border transition-all group ${
-                activeMainTab === 'settings' 
+                activeMainTab === 'extractionjobs' 
                   ? 'bg-white/5 text-[var(--color-accent)] border-[var(--color-accent)]/20' 
                   : 'text-white/40 hover:text-white hover:bg-white/5 border-transparent'
               }`}
             >
-              <Settings className="w-4 h-4" />
-              <span className="text-sm font-medium">Config / API</span>
-            </button>
-            <button 
-              onClick={() => navigateMainTab('database')} 
-              className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl border transition-all group ${
-                activeMainTab === 'database' 
-                  ? 'bg-white/5 text-[var(--color-accent)] border-[var(--color-accent)]/20' 
-                  : 'text-white/40 hover:text-white hover:bg-white/5 border-transparent'
-              }`}
-            >
-              <Database className="w-4 h-4" />
-              <span className="text-sm font-medium">Database Hub</span>
-            </button>
-            <button 
-              onClick={() => navigateMainTab('taskcenter')} 
-              className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl border transition-all group ${
-                activeMainTab === 'taskcenter' 
-                  ? 'bg-white/5 text-[var(--color-accent)] border-[var(--color-accent)]/20' 
-                  : 'text-white/40 hover:text-white hover:bg-white/5 border-transparent'
-              }`}
-            >
-              <ListChecks className="w-4 h-4" />
-              <span className="text-sm font-medium">Task Center</span>
+              <BrainCircuit className="w-4 h-4" />
+              <span className="text-sm font-medium">Extraction Jobs</span>
             </button>
             <button 
               onClick={() => navigateMainTab('chunkreview')} 
@@ -1466,15 +1440,37 @@ export default function App() {
               <span className="text-sm font-medium">Chunk Review</span>
             </button>
             <button 
-              onClick={() => navigateMainTab('extractionjobs')} 
+              onClick={() => navigateMainTab('raghealth')} 
               className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl border transition-all group ${
-                activeMainTab === 'extractionjobs' 
+                activeMainTab === 'raghealth' 
                   ? 'bg-white/5 text-[var(--color-accent)] border-[var(--color-accent)]/20' 
                   : 'text-white/40 hover:text-white hover:bg-white/5 border-transparent'
               }`}
             >
-              <BrainCircuit className="w-4 h-4" />
-              <span className="text-sm font-medium">Extraction Jobs</span>
+              <Activity className="w-4 h-4" />
+              <span className="text-sm font-medium">RAG Health</span>
+            </button>
+            <button 
+              onClick={() => navigateMainTab('publish')} 
+              className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl border transition-all group ${
+                activeMainTab === 'publish' 
+                  ? 'bg-white/5 text-[var(--color-accent)] border-[var(--color-accent)]/20' 
+                  : 'text-white/40 hover:text-white hover:bg-white/5 border-transparent'
+              }`}
+            >
+              <Database className="w-4 h-4" />
+              <span className="text-sm font-medium">Supabase Publish</span>
+            </button>
+            <button 
+              onClick={() => navigateMainTab('settings')} 
+              className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl border transition-all group ${
+                activeMainTab === 'settings' 
+                  ? 'bg-white/5 text-[var(--color-accent)] border-[var(--color-accent)]/20' 
+                  : 'text-white/40 hover:text-white hover:bg-white/5 border-transparent'
+              }`}
+            >
+              <Settings className="w-4 h-4" />
+              <span className="text-sm font-medium">Settings</span>
             </button>
           </nav>
         </div>
@@ -1540,13 +1536,13 @@ export default function App() {
               <Menu className="w-6 h-6" />
             </button>
             <h2 className="text-xs sm:text-sm font-medium text-white/70 truncate whitespace-nowrap overflow-hidden max-w-[200px] sm:max-w-none">
-              Workspace / {['taskcenter', 'chunkreview', 'extractionjobs'].includes(activeMainTab) ? 'Admin' : 'Project'} / <span className="text-white">
-                {activeMainTab === 'taskcenter' ? 'Task Center' : 
+              Workspace / {['publish', 'chunkreview', 'extractionjobs', 'scraper'].includes(activeMainTab) ? 'Admin' : 'Project'} / <span className="text-white">
+                 {activeMainTab === 'publish' ? 'Supabase Publish' : 
                  activeMainTab === 'chunkreview' ? 'Chunk Review' :
                  activeMainTab === 'extractionjobs' ? 'Extraction Jobs' :
-                 activeMainTab === 'database' ? 'Database Hub' :
-                 activeMainTab === 'processing' ? 'AI Pipeline' :
-                 activeMainTab === 'settings' ? 'Configuration' : 'New Curriculum'}
+                 activeMainTab === 'raghealth' ? 'RAG Health' :
+                 activeMainTab === 'scraper' ? 'Upload & Scraper' :
+                 activeMainTab === 'settings' ? 'Configuration' : 'Dashboard'}
               </span>
             </h2>
           </div>
@@ -2328,7 +2324,7 @@ export default function App() {
                                       <button 
                                         onClick={() => {
                                           setActiveTask(item);
-                                          setActiveMainTab('processing');
+                                          setActiveMainTab('extractionjobs');
                                         }}
                                         className="px-6 py-3 bg-[var(--color-accent)] text-black rounded-xl font-bold uppercase text-[10px] tracking-widest hover:scale-105 transition-all opacity-0 group-hover:opacity-100 shadow-xl shadow-[var(--color-accent-dim)]"
                                       >
@@ -2618,6 +2614,20 @@ export default function App() {
                     view="chunk-review"
                     onNavigate={(nextView) => navigateMainTab(nextView === 'chunk-review' ? 'chunkreview' : 'extractionjobs')}
                   />
+                </React.Suspense>
+              </motion.div>
+            )}
+
+            {activeMainTab === 'raghealth' && (
+              <motion.div
+                key="raghealth"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="max-w-[1500px] mx-auto pb-12"
+              >
+                <React.Suspense fallback={<LazySectionFallback label="RAG Health Check" />}>
+                  <RagHealthCheck />
                 </React.Suspense>
               </motion.div>
             )}
